@@ -16,6 +16,10 @@ type FixedWindowRateLimiter struct {
 	duration time.Duration
 	limit    int
 	repo     repository.Repository
+
+	// internal state
+	hasExceeded bool
+	curWindow   time.Time
 }
 
 // NewFixedWindowRateLimiter returns an instance of fixed window rate limiter.
@@ -39,26 +43,43 @@ func NewFixedWindowRateLimiter(limit int, duration time.Duration, repo repositor
 func (r *FixedWindowRateLimiter) Allow(ctx context.Context, key string) (*Result, error) {
 	now := r.clock.Now()
 	window := now.Truncate(r.duration)
+	if !r.curWindow.Equal(window) {
+		r.curWindow = window
+		r.hasExceeded = false
+	}
+
+	// if it has exceeded the limit before, do not increment store
+	windowResetTime := window.Add(r.duration).Sub(now)
+	if r.hasExceeded {
+		return &Result{
+			Limit:      r.limit,
+			Remaining:  0,
+			RetryAfter: windowResetTime,
+			ResetAfter: windowResetTime,
+		}, nil
+	}
+
+	// increment the request count in the store
 	count, err := r.repo.IncrementByKey(ctx, key, window)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to increment repository")
 	}
 
-	allowed := 1
-	// TODO: fix remaining calculation
-	remaining := 0
-	retryAfter := time.Duration()
-
-	// if the request is not allowed
+	// if exceeds the limit for the first time, flag hasExceeded
 	if count > r.limit {
-		allowed = 0
-		retryAfter = window.Add(r.duration).Sub(now)
+		r.hasExceeded = true
+		return &Result{
+			Limit:      r.limit,
+			Remaining:  0,
+			RetryAfter: windowResetTime,
+			ResetAfter: windowResetTime,
+		}, nil
 	}
 
-	res := &Result{
-		Allowed:    allowed,
-		Remaining:  remaining,
-		RetryAfter: retryAfter,
-	}
-	return res, nil
+	return &Result{
+		Limit:      r.limit,
+		Remaining:  r.limit - count,
+		RetryAfter: windowResetTime,
+		ResetAfter: windowResetTime,
+	}, nil
 }
