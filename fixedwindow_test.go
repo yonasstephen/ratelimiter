@@ -24,7 +24,7 @@ func TestAllow(t *testing.T) {
 	}{
 		{
 			name:            "requests within limit",
-			limit:           1,
+			limit:           5,
 			duration:        time.Duration(5 * time.Second),
 			numOfRequests:   4,
 			requestInterval: time.Duration(100 * time.Millisecond),
@@ -40,7 +40,6 @@ func TestAllow(t *testing.T) {
 				nil,
 				nil,
 			},
-			// TODO: add expected errors as slice
 		},
 	}
 
