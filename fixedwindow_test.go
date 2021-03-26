@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/yonasstephen/ratelimiter"
-	mock "github.com/yonasstephen/ratelimiter/mock"
+	mock "github.com/yonasstephen/ratelimiter/repository/mock"
 )
 
 func TestAllow(t *testing.T) {
@@ -17,8 +19,8 @@ func TestAllow(t *testing.T) {
 		duration        time.Duration
 		numOfRequests   int
 		requestInterval time.Duration
-		expectedResult  []*ratelimiter.Result
-		expectedError   error
+		expectedResults []*ratelimiter.Result
+		expectedErrors  []error
 	}{
 		{
 			name:            "requests within limit",
@@ -26,11 +28,17 @@ func TestAllow(t *testing.T) {
 			duration:        time.Duration(5 * time.Second),
 			numOfRequests:   4,
 			requestInterval: time.Duration(100 * time.Millisecond),
-			expectedResult: []*ratelimiter.Result{
+			expectedResults: []*ratelimiter.Result{
 				&ratelimiter.Result{
 					Allowed:   1,
 					Remaining: 4,
 				},
+			},
+			expectedErrors: []error{
+				nil,
+				nil,
+				nil,
+				nil,
 			},
 			// TODO: add expected errors as slice
 		},
@@ -47,8 +55,8 @@ func TestAllow(t *testing.T) {
 
 			for i := 0; i < tc.numOfRequests; i++ {
 				res, err := r.Allow(context.Background(), "test_key")
-				assert.Equal(t, tc.expectedResult[i], res)
-				assert.ErrorEqual(t, err, tc.ExpectedError)
+				assert.Equal(t, tc.expectedResults[i], res)
+				assert.EqualError(t, err, tc.expectedErrors[i].Error())
 			}
 		})
 	}
