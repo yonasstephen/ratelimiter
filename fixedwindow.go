@@ -77,9 +77,7 @@ func (r *FixedWindowRateLimiter) Allow(ctx context.Context, key string) (*Result
 	}
 
 	return &Result{
-		Limit:      r.limit,
-		Remaining:  r.limit - count,
-		RetryAfter: windowResetTime,
-		ResetAfter: windowResetTime,
+		Limit:     r.limit,
+		Remaining: r.limit - count,
 	}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -17,7 +18,6 @@ func TestAllow(t *testing.T) {
 		name            string
 		limit           int
 		duration        time.Duration
-		numOfRequests   int
 		requestInterval time.Duration
 		expectedResults []*ratelimiter.Result
 		expectedErrors  []error
@@ -26,15 +26,31 @@ func TestAllow(t *testing.T) {
 			name:            "requests within limit",
 			limit:           5,
 			duration:        time.Duration(5 * time.Second),
-			numOfRequests:   4,
 			requestInterval: time.Duration(100 * time.Millisecond),
 			expectedResults: []*ratelimiter.Result{
-				&ratelimiter.Result{
-					Allowed:   1,
+				{
+					Limit:     5,
 					Remaining: 4,
+				},
+				{
+					Limit:     5,
+					Remaining: 3,
+				},
+				{
+					Limit:     5,
+					Remaining: 2,
+				},
+				{
+					Limit:     5,
+					Remaining: 1,
+				},
+				{
+					Limit:     5,
+					Remaining: 0,
 				},
 			},
 			expectedErrors: []error{
+				nil,
 				nil,
 				nil,
 				nil,
@@ -49,13 +65,22 @@ func TestAllow(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockRepo := mock.NewMockRepository(ctrl)
-			r := ratelimiter.NewFixedWindowRateLimiter(tc.limit, tc.duration, mockRepo)
-			// TODO: mock IncrementByKey()
+			mockClock := clock.NewMock()
+			r := ratelimiter.NewFixedWindowRateLimiter(tc.limit, tc.duration, mockRepo, mockClock)
 
-			for i := 0; i < tc.numOfRequests; i++ {
+			for i := 0; i < len(tc.expectedResults); i++ {
+				mockRepo.
+					EXPECT().
+					IncrementByKey(gomock.Any(), gomock.Eq("test_key"), gomock.Any()).
+					Return(i+1, nil)
+
 				res, err := r.Allow(context.Background(), "test_key")
 				assert.Equal(t, tc.expectedResults[i], res)
-				assert.EqualError(t, err, tc.expectedErrors[i].Error())
+				if tc.expectedErrors[i] == nil {
+					assert.NoError(t, err)
+				} else {
+					assert.EqualError(t, err, tc.expectedErrors[i].Error())
+				}
 			}
 		})
 	}

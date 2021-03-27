@@ -9,7 +9,7 @@ import (
 // Note that on server restarts, the rate limit will be reset due to
 // in-mem approach.
 type InMemRepository struct {
-	store map[string]window
+	store map[string]windowObj
 }
 
 type windowObj struct {
@@ -20,7 +20,7 @@ type windowObj struct {
 // NewInMemRepository returns a new instance of in-mem repository
 func NewInMemRepository() *InMemRepository {
 	return &InMemRepository{
-		store: map[string]window{},
+		store: map[string]windowObj{},
 	}
 }
 

@@ -5,7 +5,9 @@
 package mock_repository
 
 import (
+	context "context"
 	reflect "reflect"
+	time "time"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -34,13 +36,16 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // IncrementByKey mocks base method.
-func (m *MockRepository) IncrementByKey(key string) {
+func (m *MockRepository) IncrementByKey(ctx context.Context, key string, window time.Time) (int, error) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "IncrementByKey", key)
+	ret := m.ctrl.Call(m, "IncrementByKey", ctx, key, window)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // IncrementByKey indicates an expected call of IncrementByKey.
-func (mr *MockRepositoryMockRecorder) IncrementByKey(key interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) IncrementByKey(ctx, key, window interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementByKey", reflect.TypeOf((*MockRepository)(nil).IncrementByKey), key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementByKey", reflect.TypeOf((*MockRepository)(nil).IncrementByKey), ctx, key, window)
 }
