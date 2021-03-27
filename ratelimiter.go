@@ -16,12 +16,15 @@ type RateLimiter interface {
 type Result struct {
 	// Limit is the limit that was used to get this result
 	Limit int
+
 	// Remaining indicates how many remaining request is allowed at time.Now
 	Remaining int
+
 	// RetryAfer indicates the duration that requester need to wait
 	// until the request will be allowed. If the request is allowed,
 	// a zero value will be returned
 	RetryAfter time.Duration
+
 	// ResetAfter indicates the duration that the requester need to wait
 	// until the time moves to the next rate limit window and hence resetting
 	// the count. You can also think of this as the time when Limit == Remaining.

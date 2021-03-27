@@ -28,7 +28,7 @@ type FixedWindowRateLimiter struct {
 //   limit := 1
 //   duration := 5*time.Second
 //   // this gives us a rate of 1 request per 5 second window
-//
+//   rateLimiter := NewFixedWindowRateLimiter(limit, duration, repo, clock)
 func NewFixedWindowRateLimiter(limit int, duration time.Duration, repo repository.Repository, clock clock.Clock) *FixedWindowRateLimiter {
 	return &FixedWindowRateLimiter{
 		clock:    clock,
