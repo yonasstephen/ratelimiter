@@ -4,7 +4,7 @@
 # Rate Limiter
 This package provides extensible rate limiter module in Go. There are 2 main extensible points:
 1. Rate limit algorithm (fixed window, sliding window, leaky bucket, etc.)
-2. Data store (in-memory, Redis, Hazelcase, etc.)
+2. Data store (in-memory, Redis, Hazelcast, etc.)
 
 ## Supported Algorithm
 ### Fixed Window
