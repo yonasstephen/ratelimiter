@@ -1,5 +1,7 @@
 package repository
 
+//go:generate mockgen -package=mocks -destination=mocks/repository.go github.com/yonasstephen/ratelimiter/repository Repository
+
 import (
 	"context"
 	"time"

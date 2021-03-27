@@ -11,13 +11,35 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/yonasstephen/ratelimiter"
-	mock "github.com/yonasstephen/ratelimiter/repository/mock"
+	"github.com/yonasstephen/ratelimiter/repository/mocks"
 )
 
 type repoExpectation struct {
 	timeWindow string // time string in RFC3339
 	count      int
 	err        error
+}
+
+type timeMatcher struct {
+	expectedTime time.Time
+}
+
+func matchesTime(tm time.Time) gomock.Matcher {
+	return &timeMatcher{expectedTime: tm}
+}
+
+// Matches returns whether x is a match.
+func (m *timeMatcher) Matches(x interface{}) bool {
+	v, ok := x.(time.Time)
+	if !ok {
+		return false
+	}
+	return m.expectedTime.Equal(v)
+}
+
+// String describes what the matcher matches.
+func (m *timeMatcher) String() string {
+	return "matches time using time.Equal() where different timezone can match if the datetime are equal when converted to the same timezone"
 }
 
 func TestAllow(t *testing.T) {
@@ -37,27 +59,27 @@ func TestAllow(t *testing.T) {
 			requestInterval: time.Duration(100 * time.Millisecond),
 			expectedRepoReturn: []repoExpectation{
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      1,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      2,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      3,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      4,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      5,
 					err:        nil,
 				},
@@ -99,17 +121,17 @@ func TestAllow(t *testing.T) {
 			requestInterval: time.Second,
 			expectedRepoReturn: []repoExpectation{
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      1,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      2,
 					err:        nil,
 				},
 				{
-					timeWindow: "1970-01-01T07:30:00+07:30",
+					timeWindow: "1970-01-01T00:00:00Z",
 					count:      3,
 					err:        nil,
 				},
@@ -117,7 +139,7 @@ func TestAllow(t *testing.T) {
 				{},
 				// should make repo call because window has changed
 				{
-					timeWindow: "1970-01-01T07:30:04+07:30",
+					timeWindow: "1970-01-01T00:00:04Z",
 					count:      1,
 					err:        nil,
 				},
@@ -165,7 +187,7 @@ func TestAllow(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockRepo := mock.NewMockRepository(ctrl)
+			mockRepo := mocks.NewMockRepository(ctrl)
 			mockClock := clock.NewMock()
 			r := ratelimiter.NewFixedWindowRateLimiter(tc.limit, tc.duration, mockRepo, mockClock)
 
@@ -178,7 +200,7 @@ func TestAllow(t *testing.T) {
 
 					mockRepo.
 						EXPECT().
-						IncrementByKey(gomock.Any(), gomock.Eq("test_key"), expectedWindow).
+						IncrementByKey(gomock.Any(), gomock.Eq("test_key"), matchesTime(expectedWindow)).
 						Return(tc.expectedRepoReturn[i].count, tc.expectedRepoReturn[i].err)
 				}
 

@@ -1,0 +1,6 @@
+
+generate: # generate all mocks based on go:generate definitions
+	go generate ./...
+
+test:
+	go test -v ./...
