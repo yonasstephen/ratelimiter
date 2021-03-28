@@ -2,6 +2,7 @@ package ratelimiter_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -176,6 +177,62 @@ func TestAllow(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
+				nil,
+			},
+		},
+		{
+			name:            "requests within limit - repo returns error",
+			limit:           5,
+			duration:        time.Duration(5 * time.Second),
+			requestInterval: time.Duration(100 * time.Millisecond),
+			expectedRepoReturn: []repoExpectation{
+				{
+					timeWindow: "1970-01-01T00:00:00Z",
+					count:      0,
+					err:        errors.New("unexpected repo error"),
+				},
+				{
+					timeWindow: "1970-01-01T00:00:00Z",
+					count:      1,
+					err:        nil,
+				},
+				{
+					timeWindow: "1970-01-01T00:00:00Z",
+					count:      0,
+					err:        errors.New("unexpected repo error"),
+				},
+				{
+					timeWindow: "1970-01-01T00:00:00Z",
+					count:      2,
+					err:        nil,
+				},
+				{
+					timeWindow: "1970-01-01T00:00:00Z",
+					count:      3,
+					err:        nil,
+				},
+			},
+			expectedResults: []*ratelimiter.Result{
+				nil,
+				{
+					Limit:     5,
+					Remaining: 4,
+				},
+				nil,
+				{
+					Limit:     5,
+					Remaining: 3,
+				},
+				{
+					Limit:     5,
+					Remaining: 2,
+				},
+			},
+			expectedErrors: []error{
+				errors.New("failed to increment repository: unexpected repo error"),
+				nil,
+				errors.New("failed to increment repository: unexpected repo error"),
 				nil,
 				nil,
 			},
