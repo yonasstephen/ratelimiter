@@ -14,6 +14,7 @@ This is the simplest algorithm for rate limiting. It divides the time into fixed
 3. hh:24 - hh:35
 4. hh:36 - hh:47
 5. hh:48 - hh:59
+
 Where hh is any hours in the clock. This algorithm is susceptible to spike near the window boundaries. For instance 5 requests at hh:11 and 5 requests at hh:12 are allowed because they happen to fall on 2 windows although if you see it without the windows, you are allowing 10 requests within 2 seconds.
 
 ## Supported Data Store
@@ -31,8 +32,10 @@ import github.com/yonasstephen/ratelimiter
 func main() {
     repo := mocks.NewInMemRepository()
     clock := clock.Clock()
+    // setting the limit to 5 per minute
     r := ratelimiter.NewFixedWindowRateLimiter("5", time.Minute, repo, clock)
 
+    // increasing the rate limit count for user_123
     res, err := r.Allow(context.Background(), "user_123")
     if err != nil {
         fmt.Fatal("failed to check rate limit")
