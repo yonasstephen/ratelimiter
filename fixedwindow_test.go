@@ -87,22 +87,27 @@ func TestAllow(t *testing.T) {
 			},
 			expectedResults: []*ratelimiter.Result{
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 4,
 				},
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 3,
 				},
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 2,
 				},
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 1,
 				},
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 0,
 				},
@@ -147,21 +152,25 @@ func TestAllow(t *testing.T) {
 			},
 			expectedResults: []*ratelimiter.Result{
 				{
+					Allowed:   1,
 					Limit:     2,
 					Remaining: 1,
 				},
 				{
+					Allowed:   1,
 					Limit:     2,
 					Remaining: 0,
 				},
 				// has exceeded limit
 				{
+					Allowed:    0,
 					Limit:      2,
 					Remaining:  0,
 					RetryAfter: time.Duration(2 * time.Second),
 					ResetAfter: time.Duration(2 * time.Second),
 				},
 				{
+					Allowed:    0,
 					Limit:      2,
 					Remaining:  0,
 					RetryAfter: time.Duration(1 * time.Second),
@@ -169,6 +178,7 @@ func TestAllow(t *testing.T) {
 				},
 				// should reset on next window
 				{
+					Allowed:   1,
 					Limit:     2,
 					Remaining: 1,
 				},
@@ -182,7 +192,7 @@ func TestAllow(t *testing.T) {
 			},
 		},
 		{
-			name:            "requests within limit - repo returns error",
+			name:            "requests within limit with repo returns error",
 			limit:           5,
 			duration:        time.Duration(5 * time.Second),
 			requestInterval: time.Duration(100 * time.Millisecond),
@@ -216,15 +226,18 @@ func TestAllow(t *testing.T) {
 			expectedResults: []*ratelimiter.Result{
 				nil,
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 4,
 				},
 				nil,
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 3,
 				},
 				{
+					Allowed:   1,
 					Limit:     5,
 					Remaining: 2,
 				},

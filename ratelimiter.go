@@ -14,6 +14,11 @@ type RateLimiter interface {
 
 // Result embodies information about the current state of the rate limit
 type Result struct {
+	// Allowed is the number of requests that are allowed at time.Now().
+	// Zero value means that the request is not allowed i.e. has exceeded
+	// the rate limit threshold
+	Allowed int
+
 	// Limit is the limit that was used to get this result
 	Limit int
 

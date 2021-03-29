@@ -52,6 +52,7 @@ func (r *FixedWindowRateLimiter) Allow(ctx context.Context, key string) (*Result
 	windowResetTime := window.Add(r.duration).Sub(now)
 	if r.hasExceeded {
 		return &Result{
+			Allowed:    0,
 			Limit:      r.limit,
 			Remaining:  0,
 			RetryAfter: windowResetTime,
@@ -69,6 +70,7 @@ func (r *FixedWindowRateLimiter) Allow(ctx context.Context, key string) (*Result
 	if count > r.limit {
 		r.hasExceeded = true
 		return &Result{
+			Allowed:    0,
 			Limit:      r.limit,
 			Remaining:  0,
 			RetryAfter: windowResetTime,
@@ -77,6 +79,7 @@ func (r *FixedWindowRateLimiter) Allow(ctx context.Context, key string) (*Result
 	}
 
 	return &Result{
+		Allowed:   1,
 		Limit:     r.limit,
 		Remaining: r.limit - count,
 	}, nil
