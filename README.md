@@ -5,7 +5,7 @@
 # Rate Limiter
 This package provides extensible rate limiter module in Go. There are 2 main extensible points:
 1. Rate limit algorithm (fixed window, sliding window, leaky bucket, etc.)
-2. Data store (in-memory, Redis, Hazelcast, etc.)
+2. Data store - to track request count by key (in-memory, Redis, Hazelcast, etc.)
 
 ## Supported Algorithm
 ### Fixed Window
@@ -45,6 +45,13 @@ func main() {
 }
 ```
 There exists an example on how to use the ratelimiter module as a HTTP middleware as well in the [examples/httpserver](https://github.com/yonasstephen/ratelimiter/tree/master/examples/httpserver) folder.
+
+## What's next
+These are future improvements that can be made on this module:
+- [ ] Thread-safe implementation of in-mem repository
+- [ ] Integration test for examples/httpserver
+- [ ] Sliding window algorithm implementation
+- [ ] Redis repository implementation
 
 ## Contributing
 Run tests
