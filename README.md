@@ -43,6 +43,7 @@ func main() {
     fmt.Println(res)
 }
 ```
+There exists an example on how to use the ratelimiter module as a HTTP middleware as well in the [examples/httpserver](https://github.com/yonasstephen/ratelimiter/tree/master/examples/httpserver) folder.
 
 ## Contributing
 Run tests
