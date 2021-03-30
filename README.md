@@ -8,14 +8,14 @@ This package provides extensible rate limiter module in Go. There are 2 main ext
 
 ## Supported Algorithm
 ### Fixed Window
-This is the simplest algorithm for rate limiting. It divides the time into fixed window. For example a rate of 5 per minute gives us the following time windows:
+This is the simplest algorithm for rate limiting. It divides the time into fixed window. For example a rate of 5 per 12 minutes gives us the following time windows:
 1. hh:00 - hh:11
 2. hh:12 - hh:23
 3. hh:24 - hh:35
 4. hh:36 - hh:47
 5. hh:48 - hh:59
 
-Where hh is any hours in the clock. This algorithm is susceptible to spike near the window boundaries. For instance 5 requests at hh:11 and 5 requests at hh:12 are allowed because they happen to fall on 2 windows although if you see it without the windows, you are allowing 10 requests within 2 seconds.
+Where hh is any hours in the clock. This algorithm is susceptible to spike near the window boundaries. For instance 5 requests at hh:11 and 5 requests at hh:12 are allowed because they happen to fall on 2 windows although if you see it without the windows, you are allowing 10 requests within 2 minutes.
 
 ## Supported Data Store
 ### In-memory
@@ -43,6 +43,7 @@ func main() {
     fmt.Println(res)
 }
 ```
+There exists an example on how to use the ratelimiter module as a HTTP middleware as well in the [examples/httpserver](https://github.com/yonasstephen/ratelimiter/tree/master/examples/httpserver) folder.
 
 ## Contributing
 Run tests
