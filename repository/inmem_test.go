@@ -92,7 +92,7 @@ func TestIncrementByKey_RaceCondition(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			inMem.IncrementByKey(ctx, "key1", mockClock.Now())
+			_, _ = inMem.IncrementByKey(ctx, "key1", mockClock.Now())
 		}()
 	}
 	wg.Wait()
