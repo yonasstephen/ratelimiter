@@ -48,7 +48,7 @@ There exists an example on how to use the ratelimiter module as a HTTP middlewar
 
 ## What's next
 These are future improvements that can be made on this module:
-- [ ] Thread-safe implementation of in-mem repository
+- [x] Thread-safe implementation of in-mem repository
 - [ ] Integration test for examples/httpserver
 - [ ] Sliding window algorithm implementation
 - [ ] Redis repository implementation
