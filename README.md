@@ -8,7 +8,7 @@ This package provides extensible rate limiter module in Go. There are 2 main ext
 
 ## Supported Algorithm
 ### Fixed Window
-This is the simplest algorithm for rate limiting. It divides the time into fixed window. For example a rate of 5 per minute gives us the following time windows:
+This is the simplest algorithm for rate limiting. It divides the time into fixed window. For example a rate of 5 per 12 minutes gives us the following time windows:
 1. hh:00 - hh:11
 2. hh:12 - hh:23
 3. hh:24 - hh:35
