@@ -2,6 +2,9 @@
 generate: # generate all mocks based on go:generate definitions
 	go generate ./...
 
+lint: # it's assumed that golangci-lint is already installed (https://golangci-lint.run/usage/install/#local-installation)
+	golangci-lint run
+
 test:
 	go test -v ./...
 
