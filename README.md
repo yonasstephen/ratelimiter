@@ -15,7 +15,7 @@ This is the simplest algorithm for rate limiting. It divides the time into fixed
 4. hh:36 - hh:47
 5. hh:48 - hh:59
 
-Where hh is any hours in the clock. This algorithm is susceptible to spike near the window boundaries. For instance 5 requests at hh:11 and 5 requests at hh:12 are allowed because they happen to fall on 2 windows although if you see it without the windows, you are allowing 10 requests within 2 seconds.
+Where hh is any hours in the clock. This algorithm is susceptible to spike near the window boundaries. For instance 5 requests at hh:11 and 5 requests at hh:12 are allowed because they happen to fall on 2 windows although if you see it without the windows, you are allowing 10 requests within 2 minutes.
 
 ## Supported Data Store
 ### In-memory
