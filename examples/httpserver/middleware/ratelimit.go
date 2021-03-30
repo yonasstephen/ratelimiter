@@ -39,10 +39,10 @@ func (m *RateLimitMiddleware) AttachRateLimitMiddleware(next http.Handler) http.
 
 		if res.Allowed == 0 {
 			// request is not allowed
-			w.WriteHeader(http.StatusTooManyRequests)
 			w.Header().Set("RateLimit-Limit", strconv.Itoa(res.Limit))
 			w.Header().Set("RateLimit-Retry-After", res.RetryAfter.String())
 			w.Header().Set("RateLimit-Reset-After", res.ResetAfter.String())
+			w.WriteHeader(http.StatusTooManyRequests)
 			w.Write([]byte("request has exceeded rate limit"))
 			return
 		}
