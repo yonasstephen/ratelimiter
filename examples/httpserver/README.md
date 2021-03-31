@@ -16,8 +16,10 @@ curl http://localhost:8080/ping
 Response
 HTTP/1.1 429 Too Many Requests
 Ratelimit-Limit: 5
-Ratelimit-Reset-After: 27.454376s
-Ratelimit-Retry-After: 27.454376s
+Ratelimit-Reset-After: 2021-03-31T09:25:00+08:00
+Ratelimit-Reset-After: 24.423062
+Ratelimit-Retry-After: 2021-03-31T09:25:00+08:00
+Ratelimit-Retry-After: 24.423062
 Date: Tue, 30 Mar 2021 00:00:00 GMT
 Content-Length: 31
 Content-Type: text/plain; charset=utf-8
