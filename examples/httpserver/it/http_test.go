@@ -71,32 +71,38 @@ func (s *httpServerTestSuite) Test_TestEndpoint() {
 	// TODO: make test more deterministic by using a mock clock
 	url := fmt.Sprintf("http://localhost:%d/test", s.httpServerOpts.Port)
 
+	var resp *http.Response
+	var err error
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+
 	for i := 0; i < s.httpServerOpts.RateLimitCount; i++ {
-		resp, err := http.Get(url)
+		resp, err = http.Get(url)
 		s.NoError(err)
 		s.Equal(http.StatusOK, resp.StatusCode)
 
 		body, err := ioutil.ReadAll(resp.Body)
 		s.NoError(err)
-		defer resp.Body.Close()
 		s.Equal("request is successful!", string(body))
-		// TODO: add rate limit header on succesful requests
-		// s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount), resp.Header.Get("RateLimit-Limit"))
-		// s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount-i+1), resp.Header.Get("RateLimit-Remaining"))
-
+		s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount), resp.Header.Get("RateLimit-Limit"))
+		s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount-(i+1)), resp.Header.Get("RateLimit-Remaining"))
+		s.Len(resp.Header.Values("RateLimit-Reset-After"), 2)
 	}
 
 	// should hit rate limit
-	resp, err := http.Get(url)
+	resp, err = http.Get(url)
 	s.NoError(err)
 	s.Equal(http.StatusTooManyRequests, resp.StatusCode)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	s.NoError(err)
-	defer resp.Body.Close()
 	s.Equal("request has exceeded rate limit", string(body))
 	s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount), resp.Header.Get("RateLimit-Limit"))
 	s.Equal("0", resp.Header.Get("RateLimit-Remaining"))
+	// TODO: implement stricter RateLimit-Retry & Reset-After assertions
 	s.Len(resp.Header.Values("RateLimit-Retry-After"), 2)
 	s.Len(resp.Header.Values("RateLimit-Reset-After"), 2)
 
@@ -108,6 +114,8 @@ func (s *httpServerTestSuite) Test_TestEndpoint() {
 
 	body, err = ioutil.ReadAll(resp.Body)
 	s.NoError(err)
-	defer resp.Body.Close()
 	s.Equal("request is successful!", string(body))
+	s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount), resp.Header.Get("RateLimit-Limit"))
+	s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount-1), resp.Header.Get("RateLimit-Remaining"))
+	s.Len(resp.Header.Values("RateLimit-Reset-After"), 2)
 }
