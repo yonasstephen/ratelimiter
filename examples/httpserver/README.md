@@ -25,5 +25,5 @@ Date: Tue, 30 Mar 2021 00:00:00 GMT
 Content-Length: 31
 Content-Type: text/plain; charset=utf-8
 
-request has exceeded rate limit
+Rate limit exceeded. Try again in 24.423062 seconds
 ```

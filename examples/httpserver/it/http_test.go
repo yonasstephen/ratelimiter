@@ -99,7 +99,7 @@ func (s *httpServerTestSuite) Test_TestEndpoint() {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	s.NoError(err)
-	s.Equal("request has exceeded rate limit", string(body))
+	s.Contains(string(body), "Rate limit exceeded. Try again in")
 	s.Equal(strconv.Itoa(s.httpServerOpts.RateLimitCount), resp.Header.Get("RateLimit-Limit"))
 	s.Equal("0", resp.Header.Get("RateLimit-Remaining"))
 	// TODO: implement stricter RateLimit-Retry & Reset-After assertions

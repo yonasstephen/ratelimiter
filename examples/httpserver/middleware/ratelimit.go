@@ -51,7 +51,7 @@ func (m *RateLimitMiddleware) AttachRateLimitMiddleware(next http.Handler) http.
 			w.Header().Set("RateLimit-Retry-After", m.clock.Now().Add(res.RetryAfter).Format(time.RFC3339))
 			w.Header().Add("RateLimit-Retry-After", fmt.Sprintf("%f", res.RetryAfter.Seconds()))
 			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte("request has exceeded rate limit"))
+			w.Write([]byte(fmt.Sprintf("Rate limit exceeded. Try again in %f seconds", res.RetryAfter.Seconds())))
 			return
 		}
 
