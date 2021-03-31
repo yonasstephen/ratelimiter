@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
 
-	"github.com/benbjohnson/clock"
 	"github.com/spf13/viper"
-	"github.com/yonasstephen/ratelimiter"
-	"github.com/yonasstephen/ratelimiter/examples/httpserver/middleware"
-	"github.com/yonasstephen/ratelimiter/repository"
+	"github.com/yonasstephen/ratelimiter/examples/httpserver/server"
 )
 
 func main() {
@@ -31,29 +29,24 @@ func main() {
 	limit := viper.GetInt("RATE_LIMIT_COUNT")
 	duration := viper.GetDuration("RATE_LIMIT_DURATION")
 
-	// init dependencies
-	inMemRepo := repository.NewInMemRepository()
-	clock := clock.New()
-	fixedWindowLimiter := ratelimiter.NewFixedWindowRateLimiter(limit, duration, inMemRepo, clock)
-	rateLimitMiddleware := middleware.NewRateLimiterMiddleware(fixedWindowLimiter)
+	httpServer := server.NewHTTPServer(server.Opts{
+		Port:              port,
+		RateLimitCount:    limit,
+		RateLimitDuration: duration,
+	})
 
-	// setup http handlers
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ping", handlePing)
+	ctx, cancel := context.WithCancel(context.Background())
 
-	testHandler := http.HandlerFunc(handleTest)
-	mux.Handle("/test", rateLimitMiddleware.AttachRateLimitMiddleware(testHandler))
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
 
-	// serve http server
-	log.Println("Running httpserver on port", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), mux))
-}
+	go func() {
+		oscall := <-c
+		log.Println("system call:", oscall)
+		cancel()
+	}()
 
-// handlePing is a health check endpoint
-func handlePing(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "pong")
-}
-
-func handleTest(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "request is successful!")
+	if err := httpServer.Start(ctx); err != nil {
+		log.Println("failed to start HTTP Server:", err)
+	}
 }
